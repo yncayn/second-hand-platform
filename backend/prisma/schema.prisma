@@ -1,0 +1,214 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+//////////////////////////////////////////////////
+// ENUM
+//////////////////////////////////////////////////
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+  WITHDRAWN
+}
+
+enum ProductCategory {
+  DIGITAL
+  FASHION
+  BOOK
+  BEAUTY
+  ETC
+}
+
+enum ProductStatus {
+  SALE
+  RESERVED
+  SOLD
+}
+
+enum TransactionStatus {
+  REQUESTED
+  COMPLETED
+}
+
+enum ReportStatus {
+  PENDING
+  COMPLETED
+}
+
+enum ReportType {
+  PRODUCT
+  USER
+}
+
+//////////////////////////////////////////////////
+// USER
+//////////////////////////////////////////////////
+
+model User {
+  user_id Int @id @default(autoincrement())
+
+  email    String @unique
+  password String
+  nickname String @unique
+
+  role   UserRole   @default(USER)
+  status UserStatus @default(ACTIVE)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // Relations
+
+  products Product[]
+
+  purchases Transaction[]
+
+  buyerRooms ChatRoom[]
+
+  messages ChatMessage[]
+
+  reports Report[] @relation("Reporter") //User과 Report의 관계가 두 개 (신고자, 신고대상자)
+
+  reportedUsers Report[] @relation("TargetUser")
+}
+
+//////////////////////////////////////////////////
+// PRODUCT
+//////////////////////////////////////////////////
+model Product {
+  product_id Int @id @default(autoincrement())
+
+  seller_id Int //Fk
+
+  product_name String
+
+  product_description String
+
+  price Int
+
+  category ProductCategory
+
+  status ProductStatus @default(SALE)
+
+  created_at DateTime @default(now())
+
+  updated_at DateTime @updatedAt
+
+  seller User @relation(fields: [seller_id], references: [user_id])
+
+  images ProductImage[]
+
+  chatRooms ChatRoom[]
+
+  reports Report[]
+
+  transaction Transaction?
+}
+
+//////////////////////////////////////////////////
+// PRODUCTIMAGE
+//////////////////////////////////////////////////
+model ProductImage {
+  product_image_id Int @id @default(autoincrement())
+
+  product_id Int //Fk
+
+  image_url String
+
+  product Product @relation(fields: [product_id], references: [product_id])
+}
+
+//////////////////////////////////////////////////
+// CHATROOM
+//////////////////////////////////////////////////
+model ChatRoom {
+  chatroom_id Int @id @default(autoincrement())
+
+  product_id Int //Fk
+
+  buyer_id Int //Fk
+
+  created_at DateTime @default(now())
+
+  product Product @relation(fields: [product_id], references: [product_id])
+
+  buyer User @relation(fields: [buyer_id], references: [user_id])
+
+  chatMessages ChatMessage[]
+}
+
+//////////////////////////////////////////////////
+// CHATMESSAGE
+//////////////////////////////////////////////////
+model ChatMessage {
+  chat_id Int @id @default(autoincrement())
+
+  chatroom_id Int //Fk
+
+  sender_id Int //Fk
+
+  message String
+
+  created_at DateTime @default(now())
+
+  chatRoom ChatRoom @relation(fields: [chatroom_id], references: [chatroom_id])
+
+  sender User @relation(fields: [sender_id], references: [user_id])
+}
+
+//////////////////////////////////////////////////
+// TRANSACTION
+//////////////////////////////////////////////////
+model Transaction {
+  transaction_id Int @id @default(autoincrement())
+
+  product_id Int @unique //Fk
+
+  buyer_id Int //Fk
+
+  created_at DateTime @default(now())
+
+  status TransactionStatus @default(REQUESTED)
+
+  product Product @relation(fields: [product_id], references: [product_id])
+
+  buyer User @relation(fields: [buyer_id], references: [user_id])
+}
+
+//////////////////////////////////////////////////
+// REPORT 
+//////////////////////////////////////////////////
+model Report {
+  report_id Int @id @default(autoincrement())
+
+  reporter_id Int //Fk
+
+  target_product_id Int? //Fk
+
+  target_user_id Int? //Fk
+
+  reason String
+
+  status ReportStatus @default(PENDING)
+
+  created_at DateTime @default(now())
+
+  report_type ReportType
+
+  reporter User @relation("Reporter", fields: [reporter_id], references: [user_id])
+
+  targetUser User? @relation("TargetUser", fields: [target_user_id], references: [user_id])
+
+  targetProduct Product? @relation(fields: [target_product_id], references: [product_id])
+}
