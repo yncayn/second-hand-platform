@@ -23,7 +23,14 @@ async function bootstrap() {
     .setTitle('Second Hand Platform API')
     .setDescription('중고거래 플랫폼 API 문서')
     .setVersion('1.0')
-    .addBearerAuth() // JWT 인증 버튼 추가
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+      },
+      'JWT-auth',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
