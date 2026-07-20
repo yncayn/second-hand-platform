@@ -1,7 +1,6 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service'
 import { SignupDto } from './dto/signup.dto'
-import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -48,51 +47,11 @@ export class AuthService {
         })
 
         // 5. 반환 
-        return {
-                    message: "회원가입이 완료되었습니다.",
-                    data:{
-                        user_id:user.user_id,
-                        email:user.email,
-                        nickname:user.nickname,
-                    }
-                }
-        
-    }
-
-    // 로그인 서비스 
-    async login(dto: LoginDto){
-        // 이메일 조회
-        const user = await this.prisma.user.findUnique({
-            where:{
-                email:dto.email
-            }
-        });
-
-        if (!user){
-            throw new UnauthorizedException(
-                '이메일 또는 비밀번호가 올바르지 않습니다. '
-            );
-        }
-
-        //비밀번호 비교
-        const isMatch = await bcrypt.compare(dto.password, user.password);
-
-        if (!isMatch){
-            throw new UnauthorizedException(
-                '이메일 또는 비밀번호가 올바르지 않습니다. '
-            );
-        }
-
-        // JWT 붙이기 전 임시 응답
-        return {
-        message: '로그인 성공',
-        data: {
+        return{
             user_id: user.user_id,
             email: user.email,
             nickname: user.nickname,
-        },
-        };
-
-
+        }
+        
     }
 }
