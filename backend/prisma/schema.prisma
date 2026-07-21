@@ -39,6 +39,8 @@ enum ProductStatus {
 enum TransactionStatus {
   REQUESTED
   COMPLETED
+  CANCELLED
+
 }
 
 enum ReportStatus {
@@ -72,7 +74,7 @@ model User {
 
   products Product[]
 
-  purchases Transaction[]
+  transactions Transaction[]
 
   buyerRooms ChatRoom[]
 
