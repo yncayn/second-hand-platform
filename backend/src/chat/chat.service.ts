@@ -67,14 +67,20 @@ export class  ChatService{
                 ],
                 },
                 include: {
-                product: true,
-                buyer: {
-                    select: {
-                    user_id: true,
-                    nickname: true,
+                    product: true,
+                    buyer: {
+                        select: {
+                        user_id: true,
+                        nickname: true,
+                        },
                     },
-                },
-                },
+                    chatMessages: {
+                        take: 1,
+                        orderBy: {
+                        created_at: "desc",
+                        },
+                    },
+                    },
                 orderBy: {
                 created_at: 'desc',
                 },

@@ -2,8 +2,20 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { io, Socket } from "socket.io-client";
 
-function Chat() {
-    const [messages, setMessages] = useState<any[]>([]);
+interface ChatProps {
+    roomId: number;
+    onBack: () => void;
+    }
+
+    interface Message {
+    chat_id: number;
+    sender_id: number;
+    message: string;
+    created_at: string;
+    }
+
+    function Chat({ roomId, onBack }: ChatProps) {
+    const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState("");
     const [myId, setMyId] = useState<number | null>(null);
 
@@ -13,6 +25,8 @@ function Chat() {
     const accessToken = localStorage.getItem("accessToken");
 
     useEffect(() => {
+        if (!accessToken) return;
+
         getMyInfo();
         getMessages();
 
@@ -24,19 +38,19 @@ function Chat() {
 
         socketRef.current = socket;
 
-        socket.emit("joinRoom", 1);
+        socket.emit("joinRoom", roomId);
 
         socket.off("receiveMessage");
 
-        socket.on("receiveMessage", (data) => {
-        setMessages((prev) => [...prev, data]);
+        socket.on("receiveMessage", (message: Message) => {
+        setMessages((prev) => [...prev, message]);
         });
 
         return () => {
         socket.off("receiveMessage");
         socket.disconnect();
         };
-    }, []);
+    }, [roomId]);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({
@@ -61,11 +75,11 @@ function Chat() {
     const getMessages = async () => {
         try {
         const res = await axios.get(
-            "http://localhost:3000/chatrooms/1/messages",
+            `http://localhost:3000/chatrooms/${roomId}/messages`,
             {
-                headers: {
+            headers: {
                 Authorization: `Bearer ${accessToken}`,
-                },
+            },
             }
         );
 
@@ -75,46 +89,67 @@ function Chat() {
         }
     };
 
-const send = () => {
-    if (!input.trim()) return;
-    if (!socketRef.current?.connected) return;
+    const send = () => {
+        if (!input.trim()) return;
+        if (!socketRef.current?.connected) return;
 
-    socketRef.current.emit("sendMessage", {
-        chatroomId: 1,
+        socketRef.current.emit("sendMessage", {
+        chatroomId: roomId,
         message: input,
-    });
+        });
 
-    setInput("");
-};
+        setInput("");
+    };
 
     return (
         <div
         style={{
-            width: "420px",
+            width: 420,
             margin: "30px auto",
             border: "1px solid #ddd",
-            borderRadius: "10px",
+            borderRadius: 10,
             overflow: "hidden",
         }}
         >
         <div
             style={{
+            display: "flex",
+            alignItems: "center",
             background: "#ffeb3b",
             padding: "15px",
-            textAlign: "center",
-            fontWeight: "bold",
-            fontSize: "24px",
             }}
         >
+            <button
+            onClick={onBack}
+            style={{
+                marginRight: 15,
+                border: "none",
+                background: "transparent",
+                cursor: "pointer",
+                fontSize: 18,
+            }}
+            >
+            ←
+            </button>
+
+            <div
+            style={{
+                flex: 1,
+                textAlign: "center",
+                fontWeight: "bold",
+                fontSize: 22,
+            }}
+            >
             채팅방
+            </div>
         </div>
 
         <div
             style={{
-            height: "500px",
+            height: 500,
             overflowY: "auto",
             background: "#f7f7f7",
-            padding: "15px",
+            padding: 15,
             }}
         >
             {messages.map((msg) => {
@@ -126,26 +161,26 @@ const send = () => {
                 style={{
                     display: "flex",
                     justifyContent: isMine ? "flex-end" : "flex-start",
-                    marginBottom: "15px",
+                    marginBottom: 15,
                 }}
                 >
                 <div
                     style={{
-                    background: isMine ? "#ffeb3b" : "#ffffff",
-                    padding: "12px",
-                    borderRadius: "10px",
+                    background: isMine ? "#ffeb3b" : "#fff",
+                    padding: 12,
+                    borderRadius: 10,
                     maxWidth: "70%",
-                    boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+                    boxShadow: "0 1px 4px rgba(0,0,0,.08)",
                     }}
                 >
                     <div
                     style={{
-                        fontSize: "12px",
+                        fontSize: 12,
                         color: "#777",
-                        marginBottom: "5px",
+                        marginBottom: 5,
                     }}
                     >
-                    {isMine ? "나" : `상대 (${msg.sender_id})`}
+                    {isMine ? "나" : "상대방"}
                     </div>
 
                     <div>{msg.message}</div>
@@ -167,23 +202,28 @@ const send = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
+                if (e.nativeEvent.isComposing) return;
+
+                if ((e.nativeEvent as KeyboardEvent).keyCode === 229) return;
+
                 if (e.key === "Enter") {
-                send();
+                    e.preventDefault();
+                    send();
                 }
             }}
             placeholder="메시지를 입력하세요."
             style={{
                 flex: 1,
-                padding: "15px",
                 border: "none",
                 outline: "none",
+                padding: 15,
             }}
             />
 
             <button
             onClick={send}
             style={{
-                width: "90px",
+                width: 90,
                 border: "none",
                 background: "#ffeb3b",
                 cursor: "pointer",
