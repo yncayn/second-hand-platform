@@ -35,10 +35,17 @@ export class ProductController {
         return this.productService.findAll();
     }
 
-    @Get(':id') //개별 조회
+    @Get('me')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth('JWT-auth')
+    findMyProducts(@CurrentUser() user) {
+        return this.productService.findMyProducts(user.user_id);
+    }
+
+    @Get(':id')
     findOne(
-        @Param('id', ParseIntPipe) id:number,
-    ){
+    @Param('id', ParseIntPipe) id: number,
+    ) {
         return this.productService.findOne(id);
     }
 

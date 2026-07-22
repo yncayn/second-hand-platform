@@ -181,6 +181,8 @@ model Transaction {
 
   created_at DateTime @default(now())
 
+  amount Int 
+
   status TransactionStatus @default(REQUESTED)
 
   product Product @relation(fields: [product_id], references: [product_id])

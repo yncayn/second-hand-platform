@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { ProductStatus, TransactionStatus } from '@prisma/client';
 
 @Injectable()
 export class TransactionService {
@@ -20,7 +21,7 @@ export class TransactionService {
         }
 
         // 이미 판매 완료
-        if (product.status != 'SALE'){
+        if (product.status != ProductStatus.SALE){
             throw new BadRequestException('이미 거래가 완료된 상품입니다. ');
         }
 
@@ -44,7 +45,8 @@ export class TransactionService {
             data: {
             product_id: dto.product_id,
             buyer_id: buyerId,
-            status: 'COMPLETED',
+            amount: dto.amount,
+            status: TransactionStatus.COMPLETED,
             },
         });
 
@@ -53,7 +55,7 @@ export class TransactionService {
             product_id: dto.product_id,
             },
             data: {
-            status: 'SOLD',
+            status: ProductStatus.SOLD,
             },
         });
 
