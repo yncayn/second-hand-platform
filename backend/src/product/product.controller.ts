@@ -2,7 +2,7 @@ import {
     Body,
     Controller,
     Post, Get, Delete,Patch,
-    UseGuards,Param, ParseIntPipe
+    UseGuards,Param, ParseIntPipe, Query,
 } from '@nestjs/common';
 
 import { ProductService } from './product.service';
@@ -30,9 +30,12 @@ export class ProductController {
         )
     }
 
-    @Get()  // 목록 조회 
-    findAll(){
-        return this.productService.findAll();
+
+    @Get()
+    findAll(
+        @Query('keyword') keyword?: string,
+    ){
+        return this.productService.findAll(keyword);
     }
 
     @Get('me')
@@ -49,23 +52,26 @@ export class ProductController {
         return this.productService.findOne(id);
     }
 
+
+    @Delete(':id')
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth('JWT-auth')
-    @Delete(':id')  //삭제 
     remove(
         @Param('id', ParseIntPipe) id: number,
-    ){
-        return this.productService.remove(id);
+        @CurrentUser() user,
+    ) {
+        return this.productService.remove(id, user.user_id);
     }
 
+    @Patch(':id')
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth('JWT-auth')
-    @Patch(':id')   //수정
     update(
-        @Param('id', ParseIntPipe) id: number,
-        @Body() dto: UpdateProductDto
-    ){
-        return this.productService.update(id, dto);
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateProductDto,
+    @CurrentUser() user,
+    ) {
+        return this.productService.update(id, dto, user.user_id);
     }
 
 
