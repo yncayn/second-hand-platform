@@ -57,28 +57,38 @@ export class  ChatService{
             where: {
                 OR: [
                     {
-                    buyer_id: userId,
+                        buyer_id: userId,
                     },
                     {
-                    product: {
-                        seller_id: userId,
-                    },
+                        product: {
+                            seller_id: userId,
+                        },
                     },
                 ],
-                },
-                include: {
-                product: true,
-                buyer: {
-                    select: {
-                    user_id: true,
-                    nickname: true,
+            },
+
+            include: {
+                product: {
+                    include: {
+                        images: true,
                     },
                 },
+
+                buyer: {
+                    select: {
+                        user_id: true,
+                        nickname: true,
+                    },
                 },
-                orderBy: {
-                created_at: 'desc',
+
+                chatMessages: {
+                    take: 1,
+                    orderBy: {
+                        created_at: "desc",
+                    },
                 },
-            });
+            },
+        });
     }
 
     // 메시지 전송
