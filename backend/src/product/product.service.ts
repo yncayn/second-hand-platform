@@ -29,14 +29,29 @@ export class ProductService {
         }
     }
 
-    async findAll(){
-        return this.prisma.product.findMany({
-            orderBy:{
-                created_at: 'desc',
+    async findAll(keyword?: string){
+    return this.prisma.product.findMany({
+        where: keyword
+            ? {
+                OR: [
+                    {
+                        product_name: {
+                            contains: keyword,
+                        },
+                    },
+                    {
+                        product_description: {
+                            contains: keyword,
+                        },
+                    },
+                ],
             }
-        })
-    }
-
+            : {},
+        orderBy:{
+            created_at: 'desc',
+        },
+    });
+}
     async findOne(id: number) {
         const product = await this.prisma.product.findUnique({
         where: {

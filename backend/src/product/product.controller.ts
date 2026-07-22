@@ -2,7 +2,7 @@ import {
     Body,
     Controller,
     Post, Get, Delete,Patch,
-    UseGuards,Param, ParseIntPipe
+    UseGuards,Param, ParseIntPipe, Query,
 } from '@nestjs/common';
 
 import { ProductService } from './product.service';
@@ -30,9 +30,12 @@ export class ProductController {
         )
     }
 
-    @Get()  // 목록 조회 
-    findAll(){
-        return this.productService.findAll();
+
+    @Get()
+    findAll(
+        @Query('keyword') keyword?: string,
+    ){
+        return this.productService.findAll(keyword);
     }
 
     @Get('me')
@@ -48,6 +51,7 @@ export class ProductController {
     ) {
         return this.productService.findOne(id);
     }
+
 
     @Delete(':id')
     @UseGuards(JwtAuthGuard)
@@ -69,5 +73,7 @@ export class ProductController {
     ) {
         return this.productService.update(id, dto, user.user_id);
     }
+
+
 
 }
