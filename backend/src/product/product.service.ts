@@ -41,6 +41,21 @@ export class ProductService {
         })
     }
 
+    async findMyProducts(userId: number) {
+        return this.prisma.product.findMany({
+            where: {
+            seller_id: userId,
+            },
+            include: {
+            images: true,
+            transaction: true,
+            },
+            orderBy: {
+            created_at: 'desc',
+            },
+        });
+    }
+
     async remove(id:number){
         return this.prisma.product.delete({
             where:{

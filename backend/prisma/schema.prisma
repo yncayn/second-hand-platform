@@ -39,6 +39,8 @@ enum ProductStatus {
 enum TransactionStatus {
   REQUESTED
   COMPLETED
+  CANCELLED
+
 }
 
 enum ReportStatus {
@@ -72,7 +74,7 @@ model User {
 
   products Product[]
 
-  purchases Transaction[]
+  transactions Transaction[]
 
   buyerRooms ChatRoom[]
 
@@ -178,6 +180,8 @@ model Transaction {
   buyer_id Int //Fk
 
   created_at DateTime @default(now())
+
+  amount Int 
 
   status TransactionStatus @default(REQUESTED)
 
