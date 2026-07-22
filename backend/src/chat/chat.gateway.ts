@@ -1,56 +1,85 @@
 import {
-  WebSocketGateway,
-  WebSocketServer,
-  SubscribeMessage,
   ConnectedSocket,
   MessageBody,
-} from '@nestjs/websockets';
+  OnGatewayConnection,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+} from "@nestjs/websockets";
 
-import { Server, Socket } from 'socket.io';
-import { ChatService } from './chat.service';
+import { JwtService } from "@nestjs/jwt";
+import { UnauthorizedException } from "@nestjs/common";
+import { Server, Socket } from "socket.io";
+import { ChatService } from "./chat.service";
 
 @WebSocketGateway({
   cors: {
-    origin: '*',
+    origin: "*",
   },
 })
-export class ChatGateway {
+export class ChatGateway implements OnGatewayConnection {
+
   constructor(
     private readonly chatService: ChatService,
+    private readonly jwtService: JwtService,
   ) {}
 
   @WebSocketServer()
   server: Server;
+async handleConnection(client: Socket) {
+  try {
+    const rawToken = client.handshake.auth.token;
 
-  /**
-   * 채팅방 입장
-   */
-  @SubscribeMessage('joinRoom')
+    const token = rawToken?.startsWith("Bearer ")
+      ? rawToken.slice(7)
+      : rawToken;
+
+    if (!token) {
+      client.disconnect();
+      return;
+    }
+
+    const payload = await this.jwtService.verifyAsync(token);
+
+    client.data.user = payload;
+
+    console.log("JWT 인증 성공", payload);
+
+  } catch (e) {
+    console.log("JWT 인증 실패");
+    client.disconnect();
+  }
+}
+  @SubscribeMessage("joinRoom")
   handleJoinRoom(
     @ConnectedSocket() client: Socket,
     @MessageBody() roomId: number,
   ) {
+
     client.join(`room-${roomId}`);
 
-    console.log(`${client.id} joined room-${roomId}`);
+    client.emit("joinedRoom", roomId);
 
-    client.emit('joinedRoom', {
-      roomId,
-    });
   }
 
-  /**
-   * 테스트용 Ping
-   */
-  @SubscribeMessage('ping')
-  handlePing(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() data: any,
-  ) {
-    console.log(data);
+@SubscribeMessage("sendMessage")
+async handleSendMessage(
+  @ConnectedSocket() client: Socket,
+  @MessageBody() data: any,
+) {
 
-    client.emit('pong', {
-      message: 'pong',
-    });
-  }
+  const senderId = client.data.user.sub;
+
+  const savedMessage = await this.chatService.sendMessage(
+    data.chatroomId,
+    {
+      message: data.message,
+    },
+    senderId,
+  );
+
+  this.server
+    .to(`room-${data.chatroomId}`)
+    .emit("receiveMessage", savedMessage);
+}
 }

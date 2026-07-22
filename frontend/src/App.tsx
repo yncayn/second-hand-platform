@@ -1,25 +1,10 @@
-import { useEffect } from "react";
-import { io } from "socket.io-client";
-
-const socket = io("http://localhost:3000");
+import Login from "./Login";
+import Chat from "./Chat";
 
 function App() {
+  const token = localStorage.getItem("accessToken");
 
-  useEffect(() => {
-
-    socket.emit("joinRoom", 1);
-
-    socket.on("joinedRoom", (data) => {
-      console.log(data);
-    });
-
-    return () => {
-      socket.off("joinedRoom");
-    };
-
-  }, []);
-
-  return <h1>Socket Test</h1>;
+  return token ? <Chat /> : <Login />;
 }
 
 export default App;
