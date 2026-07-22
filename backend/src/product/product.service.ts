@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+    Injectable,
+    NotFoundException,
+    ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -33,12 +37,18 @@ export class ProductService {
         })
     }
 
-    async findOne(id: number){
-        return this.prisma.product.findUnique({
-            where:{
-                product_id: id,
-            }
-        })
+    async findOne(id: number) {
+        const product = await this.prisma.product.findUnique({
+        where: {
+            product_id: id,
+        },
+        });
+
+        if (!product) {
+        throw new NotFoundException('상품이 존재하지 않습니다.');
+        }
+
+        return product;
     }
 
     async findMyProducts(userId: number) {
@@ -56,21 +66,51 @@ export class ProductService {
         });
     }
 
-    async remove(id:number){
+  // 상품 삭제: IDOR 방지 
+    async remove(id: number, userId: number) {
+        const product = await this.prisma.product.findUnique({
+        where: {
+            product_id: id,
+        },
+        });
+
+        if (!product) {
+        throw new NotFoundException('상품이 존재하지 않습니다.');
+        }
+
+        if (product.seller_id !== userId) {
+        throw new ForbiddenException('삭제 권한이 없습니다.');
+        }
+
         return this.prisma.product.delete({
-            where:{
-                product_id: id
-            }
-        })
+        where: {
+            product_id: id,
+        },
+        });
     }
 
-    async update(id:number, dto: UpdateProductDto){
+    // 상품 수정 IDOR 방지 
+    async update(id: number, dto: UpdateProductDto, userId: number) {
+        const product = await this.prisma.product.findUnique({
+        where: {
+            product_id: id,
+        },
+        });
+
+        if (!product) {
+        throw new NotFoundException('상품이 존재하지 않습니다.');
+        }
+
+        if (product.seller_id !== userId) {
+        throw new ForbiddenException('수정 권한이 없습니다.');
+        }
+
         return this.prisma.product.update({
-            where:{
-                product_id: id
-            },
-            data: dto   // 요청 dto
-        })
+        where: {
+            product_id: id,
+        },
+        data: dto,
+        });
     }
 
 }

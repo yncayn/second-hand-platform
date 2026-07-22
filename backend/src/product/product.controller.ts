@@ -49,25 +49,25 @@ export class ProductController {
         return this.productService.findOne(id);
     }
 
+    @Delete(':id')
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth('JWT-auth')
-    @Delete(':id')  //삭제 
     remove(
         @Param('id', ParseIntPipe) id: number,
-    ){
-        return this.productService.remove(id);
+        @CurrentUser() user,
+    ) {
+        return this.productService.remove(id, user.user_id);
     }
 
+    @Patch(':id')
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth('JWT-auth')
-    @Patch(':id')   //수정
     update(
-        @Param('id', ParseIntPipe) id: number,
-        @Body() dto: UpdateProductDto
-    ){
-        return this.productService.update(id, dto);
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateProductDto,
+    @CurrentUser() user,
+    ) {
+        return this.productService.update(id, dto, user.user_id);
     }
-
-
 
 }
