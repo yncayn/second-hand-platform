@@ -4,9 +4,11 @@ import Register from "./pages/Register";
 import Home from "./pages/Home";
 import ChatRoomList from "./pages/ChatRoomList";
 import ChatPage from "./pages/Chat";
+import AdminHome from "./pages/AdminHome";
 
 function App() {
     const token = localStorage.getItem("accessToken");
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
 
     const [page, setPage] = useState<"login" | "register">("login");
 
@@ -19,6 +21,9 @@ function App() {
     // 로그인 상태
     if (token) {
 
+        if (user.role === "ADMIN") {
+            return <AdminHome />;
+        }
         // 채팅방 입장
         if (selectedRoomId !== null) {
             return (

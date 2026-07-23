@@ -93,13 +93,14 @@ export class AuthService {
         const accessToken = this.jwtService.sign(payload);
 
         return {
-            message: "로그인 성공",
-            accessToken,
-            user: {
-                user_id: user.user_id,
-                email: user.email,
-                nickname: user.nickname,
-            },
+        message: "로그인 성공",
+        accessToken,
+        user: {
+            user_id: user.user_id,
+            email: user.email,
+            nickname: user.nickname,
+            role: user.role,
+        },
         };
 
     }
