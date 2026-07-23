@@ -28,6 +28,11 @@ export class ReportService {
             throw new NotFoundException('상품을 찾을 수 없습니다.');
         }
 
+        // 자신의 상품 신고 방지
+        if (product.seller_id === userId) {
+            throw new BadRequestException('자신의 상품은 신고할 수 없습니다.');
+        }
+
         const exists = await this.prisma.report.findFirst({
             where: {
             reporter_id: userId,
@@ -42,7 +47,13 @@ export class ReportService {
         return this.prisma.report.create({
             data: {
             reporter_id: userId,
+
+            // 신고 대상 상품
             target_product_id: dto.target_product_id,
+
+            // 신고 대상 판매자
+            target_user_id: product.seller_id,
+
             report_type: dto.report_type,
             reason: dto.reason,
             content: dto.content,
@@ -67,6 +78,12 @@ export class ReportService {
 
         if (!user) {
             throw new NotFoundException('사용자를 찾을 수 없습니다.');
+        }
+        if (user.status === 'WITHDRAWN') {
+        throw new BadRequestException('탈퇴한 사용자는 신고할 수 없습니다.');
+        }
+        if (user.status === 'BLOCKED') {
+        throw new BadRequestException('이미 제재된 사용자입니다.');
         }
 
         const exists = await this.prisma.report.findFirst({
@@ -100,8 +117,26 @@ export class ReportService {
             reporter_id: userId,
         },
         include: {
-            targetUser: true,
-            targetProduct: true,
+            reporter: {
+                select: {
+                user_id: true,
+                nickname: true,
+                },
+            },
+            targetUser: {
+                select: {
+                user_id: true,
+                nickname: true,
+                },
+            },
+            targetProduct: {
+                select: {
+                product_id: true,
+                product_name: true,
+                price: true,
+                status: true,
+                },
+            },
         },
         orderBy: {
             created_at: 'desc',
@@ -112,9 +147,26 @@ export class ReportService {
     async findAll() {
         return this.prisma.report.findMany({
         include: {
-            reporter: true,
-            targetUser: true,
-            targetProduct: true,
+            reporter: {
+                select: {
+                user_id: true,
+                nickname: true,
+                },
+            },
+            targetUser: {
+                select: {
+                user_id: true,
+                nickname: true,
+                },
+            },
+            targetProduct: {
+                select: {
+                product_id: true,
+                product_name: true,
+                price: true,
+                status: true,
+                },
+            },
         },
         orderBy: {
             created_at: 'desc',
