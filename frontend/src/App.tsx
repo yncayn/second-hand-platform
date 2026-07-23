@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import ChatRoomList from "./pages/ChatRoomList";
 import ChatPage from "./pages/Chat";
 import AdminHome from "./pages/AdminHome";
+import Profile from "./pages/Profile";
 
 function App() {
     const token = localStorage.getItem("accessToken");
@@ -18,13 +19,27 @@ function App() {
     // 현재 선택한 채팅방
     const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
 
+    // 프로필 페이지
+    const [showProfile, setShowProfile] = useState(false);
+
     // 로그인 상태
     if (token) {
 
+        // 관리자
         if (user.role === "ADMIN") {
             return <AdminHome />;
         }
-        // 채팅방 입장
+
+        // 프로필
+        if (showProfile) {
+            return (
+                <Profile
+                    onBack={() => setShowProfile(false)}
+                />
+            );
+        }
+
+        // 채팅방
         if (selectedRoomId !== null) {
             return (
                 <ChatPage
@@ -39,7 +54,7 @@ function App() {
             return (
                 <ChatRoomList
                     onBack={() => setShowChatList(false)}
-                    onSelectRoom={(roomId)=>setSelectedRoomId(roomId)}
+                    onSelectRoom={(roomId) => setSelectedRoomId(roomId)}
                 />
             );
         }
@@ -47,9 +62,8 @@ function App() {
         // 홈
         return (
             <Home
-                onOpenChatList={() =>
-                    setShowChatList(true)
-                }
+                onOpenChatList={() => setShowChatList(true)}
+                onOpenProfile={() => setShowProfile(true)}
             />
         );
     }
