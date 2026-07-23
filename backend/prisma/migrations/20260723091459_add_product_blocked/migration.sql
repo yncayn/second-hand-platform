@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `Product` MODIFY `status` ENUM('SALE', 'RESERVED', 'SOLD', 'BLOCKED') NOT NULL DEFAULT 'SALE';

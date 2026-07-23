@@ -8,10 +8,11 @@ import { ChatModule } from './chat/chat.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { UserModule } from './user/user.module';
 import { ReportModule } from './report/report.module';
+import { AdminModule } from './admin/admin.module';
 
 
 @Module({
-  imports: [AuthModule, PrismaModule, ProductModule, ChatModule, TransactionModule, UserModule, ReportModule],
+  imports: [AuthModule, PrismaModule, ProductModule, ChatModule, TransactionModule, UserModule, ReportModule, AdminModule],
   controllers: [AppController],
   providers: [AppService],
 })
