@@ -1,0 +1,60 @@
+.home{
+    width:1200px;
+    margin:auto;
+    padding:30px;
+}
+
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:30px;
+}
+
+.search-box{
+    display:flex;
+    gap:10px;
+    margin-bottom:30px;
+}
+
+.search-box input{
+    flex:1;
+    padding:12px;
+}
+
+.search-box button{
+    width:120px;
+}
+
+.product-list{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:20px;
+}
+
+.product-card{
+    border:1px solid #ddd;
+    padding:20px;
+    border-radius:10px;
+}
+
+.product-card button{
+    width:100%;
+    margin-top:15px;
+}
+
+.product-image{
+    width:100%;
+    height:220px;
+    object-fit:cover;
+    border-radius:8px;
+    margin-bottom:15px;
+}
+
+.no-image{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#f3f3f3;
+    color:#999;
+}

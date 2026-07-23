@@ -49,7 +49,7 @@ export class AdminService {
             user_id: userId,
         },
         data: {
-            status: UserStatus.BLOCKED, // 네 enum에 맞게 수정
+            status: UserStatus.BLOCKED, 
         },
         });
     }
@@ -77,4 +77,23 @@ export class AdminService {
             },
         });
     }
+
+    async getUsers() {
+    return this.prisma.user.findMany({
+        orderBy: {
+            user_id: "desc",
+        },
+    });
+}
+
+async getProducts() {
+    return this.prisma.product.findMany({
+        include: {
+            seller: true,
+        },
+        orderBy: {
+            product_id: "desc",
+        },
+    });
+}
 }

@@ -1,0 +1,36 @@
+.product-form{
+    width:700px;
+    margin:auto;
+    padding:40px;
+
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+}
+
+.product-form input,
+.product-form textarea,
+.product-form select{
+
+    padding:12px;
+    font-size:16px;
+}
+
+.product-form textarea{
+
+    resize:none;
+    height:180px;
+}
+
+.button-group{
+
+    display:flex;
+    gap:10px;
+}
+
+.button-group button{
+
+    flex:1;
+    padding:14px;
+    cursor:pointer;
+}

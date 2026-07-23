@@ -2,7 +2,8 @@ import {
     Body,
     Controller,
     Post, Get, Delete,Patch,
-    UseGuards,Param, ParseIntPipe, Query,
+    UseGuards,Param, ParseIntPipe, Query,UploadedFile, UseInterceptors,
+
 } from '@nestjs/common';
 
 import { ProductService } from './product.service';
@@ -11,6 +12,10 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+import { join } from 'path';
 
 
 @Controller('product')
@@ -74,6 +79,36 @@ export class ProductController {
         return this.productService.update(id, dto, user.user_id);
     }
 
+    @Post(':id/image')
+    @UseGuards(JwtAuthGuard)
+    @UseInterceptors(
+    FileInterceptor('image', {
+        storage: diskStorage({
+        destination: './uploads',
+
+        filename: (req, file, cb) => {
+            const uniqueName =
+            Date.now() +
+            '-' +
+            Math.round(Math.random() * 1e9);
+
+            cb(
+            null,
+            uniqueName + extname(file.originalname),
+            );
+        },
+        }),
+    }),
+    )
+    uploadImage(
+    @Param('id', ParseIntPipe) productId: number,
+    @UploadedFile() file: Express.Multer.File,
+    ) {
+    return this.productService.uploadImage(
+        productId,
+        file.filename,
+    );
+    }
 
 
 }
