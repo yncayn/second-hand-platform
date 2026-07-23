@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "../api/axios"
 import "../styles/Login.css";
 
 interface Props {
@@ -13,7 +13,7 @@ function Register({ onLogin }: Props) {
 
     const signup = async () => {
         try {
-        await axios.post("http://localhost:3000/auth/signup", {
+        await api.post("/auth/signup", {
             email,
             password,
             nickname,

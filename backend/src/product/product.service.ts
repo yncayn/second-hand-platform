@@ -29,29 +29,38 @@ export class ProductService {
         }
     }
 
-    async findAll(keyword?: string){
+    async findAll(keyword?: string) {
     return this.prisma.product.findMany({
         where: keyword
-            ? {
-                OR: [
-                    {
-                        product_name: {
-                            contains: keyword,
-                        },
-                    },
-                    {
-                        product_description: {
-                            contains: keyword,
-                        },
-                    },
-                ],
+        ? {
+            OR: [
+                {
+                product_name: {
+                    contains: keyword,
+                },
+                },
+                {
+                product_description: {
+                    contains: keyword,
+                },
+                },
+            ],
             }
-            : {},
-        orderBy:{
-            created_at: 'desc',
+        : {},
+        include: {
+        seller: {
+            select: {
+            user_id: true,
+            nickname: true,
+            },
+        },
+        images: true,
+        },
+        orderBy: {
+        created_at: "desc",
         },
     });
-}
+    }
     async findOne(id: number) {
         const product = await this.prisma.product.findUnique({
         where: {
