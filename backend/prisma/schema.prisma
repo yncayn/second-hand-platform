@@ -34,6 +34,7 @@ enum ProductStatus {
   SALE
   RESERVED
   SOLD
+  BLOCKED
 }
 
 enum TransactionStatus {
