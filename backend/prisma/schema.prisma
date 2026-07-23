@@ -53,6 +53,15 @@ enum ReportType {
   USER
 }
 
+enum ReportReason {
+  FRAUD       // 사기
+  SPAM        // 스팸
+  ABUSE       // 욕설/비방
+  ILLEGAL     // 불법 상품
+  COPYRIGHT   // 저작권 침해
+  ETC         // 기타
+}
+
 //////////////////////////////////////////////////
 // USER
 //////////////////////////////////////////////////
@@ -203,7 +212,9 @@ model Report {
 
   target_user_id Int? //Fk
 
-  reason String
+  reason ReportReason
+
+  content String? @db.VarChar(500)
 
   status ReportStatus @default(PENDING)
 
@@ -216,4 +227,6 @@ model Report {
   targetUser User? @relation("TargetUser", fields: [target_user_id], references: [user_id])
 
   targetProduct Product? @relation(fields: [target_product_id], references: [product_id])
+
+  
 }

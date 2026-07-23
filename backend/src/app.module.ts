@@ -7,10 +7,11 @@ import { ProductModule } from './product/product.module';
 import { ChatModule } from './chat/chat.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { UserModule } from './user/user.module';
+import { ReportModule } from './report/report.module';
 
 
 @Module({
-  imports: [AuthModule, PrismaModule, ProductModule, ChatModule, TransactionModule, UserModule],
+  imports: [AuthModule, PrismaModule, ProductModule, ChatModule, TransactionModule, UserModule, ReportModule],
   controllers: [AppController],
   providers: [AppService],
 })
