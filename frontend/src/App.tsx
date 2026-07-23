@@ -1,7 +1,7 @@
 import { useState } from "react";
-import Login from "./Login";
-import Chat from "./Chat";
-import ChatRoomList from "./ChatRoomList";
+import Login from "./pages/Login";
+import Chat from "./pages/Chat";
+import ChatRoomList from "./pages/ChatRoomList";
 
 function App() {
     const token = localStorage.getItem("accessToken");
