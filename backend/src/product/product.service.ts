@@ -66,6 +66,9 @@ export class ProductService {
         where: {
             product_id: id,
         },
+        include: {
+            images: true,
+        },
         });
 
         if (!product) {
@@ -95,6 +98,9 @@ export class ProductService {
         const product = await this.prisma.product.findUnique({
         where: {
             product_id: id,
+        },
+        include: {
+            images: true,
         },
         });
 
@@ -135,6 +141,27 @@ export class ProductService {
         },
         data: dto,
         });
+    }
+
+    async uploadImage(productId: number, filename: string) {
+    // 상품 존재 여부 확인
+    const product = await this.prisma.product.findUnique({
+        where: {
+        product_id: productId,
+        },
+    });
+
+    if (!product) {
+        throw new NotFoundException('상품이 존재하지 않습니다.');
+    }
+
+    // 이미지 정보 저장
+    return this.prisma.productImage.create({
+        data: {
+        product_id: productId,
+        image_url: `/uploads/${filename}`,
+        },
+    });
     }
 
 }

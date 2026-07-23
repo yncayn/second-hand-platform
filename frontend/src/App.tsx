@@ -1,62 +1,67 @@
-// import { useState } from "react";
-// import Login from "./pages/Login";
-// import Chat from "./pages/Chat";
-// import ChatRoomList from "./pages/ChatRoomList";
-
-// function App() {
-//     const token = localStorage.getItem("accessToken");
-
-//     const [selectedRoom, setSelectedRoom] =
-//         useState<number | null>(null);
-
-//     if (!token) {
-//         return <Login />;
-//     }
-
-//     if (selectedRoom === null) {
-//         return (
-//             <ChatRoomList
-//                 onSelectRoom={setSelectedRoom}
-//             />
-//         );
-//     }
-
-//     return (
-//         <Chat
-//             roomId={selectedRoom}
-//             onBack={() => setSelectedRoom(null)}
-//         />
-//     );
-// }
-
-// export default App;
-
-
 import { useState } from "react";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
+import ChatRoomList from "./pages/ChatRoomList";
+import ChatPage from "./pages/Chat";
 
 function App() {
     const token = localStorage.getItem("accessToken");
 
     const [page, setPage] = useState<"login" | "register">("login");
 
-    if (token) {
-        return <Home />;
-    }
+    // 채팅방 목록 화면
+    const [showChatList, setShowChatList] = useState(false);
 
-    if (page === "register") {
+    // 현재 선택한 채팅방
+    const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
+
+    // 로그인 상태
+    if (token) {
+
+        // 채팅방 입장
+        if (selectedRoomId !== null) {
+            return (
+                <ChatPage
+                    roomId={selectedRoomId}
+                    onBack={() => setSelectedRoomId(null)}
+                />
+            );
+        }
+
+        // 채팅방 목록
+        if (showChatList) {
+            return (
+                <ChatRoomList
+                    onBack={() => setShowChatList(false)}
+                    onSelectRoom={(roomId)=>setSelectedRoomId(roomId)}
+                />
+            );
+        }
+
+        // 홈
         return (
-        <Register
-            onLogin={() => setPage("login")}
-        />
+            <Home
+                onOpenChatList={() =>
+                    setShowChatList(true)
+                }
+            />
         );
     }
 
+    // 회원가입
+    if (page === "register") {
+        return (
+            <Register
+                onLogin={() => setPage("login")}
+            />
+        );
+    }
+
+    // 로그인
     return (
         <Login
-        onRegister={() => setPage("register")}
+            onRegister={() => setPage("register")}
         />
     );
 }

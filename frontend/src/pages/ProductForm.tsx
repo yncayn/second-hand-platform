@@ -2,6 +2,7 @@ import { useState } from "react";
 import api from "../api/axios";
 import "../styles/ProductForm.css";
 
+
 interface Product {
     product_id: number;
     seller_id: number;
@@ -10,7 +11,12 @@ interface Product {
     price: number;
     category: string;
     status: string;
-    }
+
+    images: {
+        product_image_id: number;
+        image_url: string;
+    }[];
+}
 
     interface Props {
     onBack: () => void;
@@ -33,48 +39,81 @@ interface Product {
     const [category, setCategory] = useState(
         product?.category ?? "DIGITAL"
     );
+    const [image, setImage] = useState<File | null>(null);
 
     const createProduct = async () => {
         if (!productName || !productDescription || !price) {
-        alert("모든 항목을 입력해주세요.");
-        return;
+            alert("모든 항목을 입력해주세요.");
+            return;
         }
 
         try {
-        await api.post("/product", {
+            const res = await api.post("/product", {
             product_name: productName,
             product_description: productDescription,
             price: Number(price),
             category,
-        });
+            });
 
-        alert("상품이 등록되었습니다.");
-        onBack();
+            const productId = res.data.data.product_id;
+
+            if (image) {
+            const formData = new FormData();
+            formData.append("image", image);
+
+            await api.post(
+                `/product/${productId}/image`,
+                formData,
+                {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+                }
+            );
+            }
+
+            alert("상품이 등록되었습니다.");
+            onBack();
         } catch (e) {
-        console.error(e);
-        alert("상품 등록 실패");
+            console.error(e);
+            alert("상품 등록 실패");
         }
     };
-
+    
     const updateProduct = async () => {
         if (!productName || !productDescription || !price) {
-        alert("모든 항목을 입력해주세요.");
-        return;
+            alert("모든 항목을 입력해주세요.");
+            return;
         }
 
         try {
-        await api.patch(`/product/${product!.product_id}`, {
+            await api.patch(`/product/${product!.product_id}`, {
             product_name: productName,
             product_description: productDescription,
             price: Number(price),
             category,
-        });
+            });
 
-        alert("수정되었습니다.");
-        onBack();
+            if (image) {
+            const formData = new FormData();
+            formData.append("image", image);
+
+            await api.post(
+                `/product/${product!.product_id}/image`,
+                formData,
+                {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+                }
+            );
+            }
+
+            alert("수정되었습니다.");
+            onBack();
         } catch (e) {
-        console.error(e);
-        alert("수정 실패");
+            console.error(e);
+            alert("수정 실패");
         }
     };
 
@@ -87,6 +126,18 @@ interface Product {
             value={productName}
             onChange={(e) => setProductName(e.target.value)}
         />
+        <div>
+        <label>상품 이미지</label>
+        <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+            if (e.target.files) {
+                setImage(e.target.files[0]);
+            }
+            }}
+        />
+        </div>
 
         <textarea
             placeholder="상품 설명"

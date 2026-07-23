@@ -9,10 +9,16 @@ import { TransactionModule } from './transaction/transaction.module';
 import { UserModule } from './user/user.module';
 import { ReportModule } from './report/report.module';
 import { AdminModule } from './admin/admin.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+
 
 
 @Module({
-  imports: [AuthModule, PrismaModule, ProductModule, ChatModule, TransactionModule, UserModule, ReportModule, AdminModule],
+  imports: [ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'uploads'),
+      serveRoot: '/uploads',
+    }),AuthModule, PrismaModule, ProductModule, ChatModule, TransactionModule, UserModule, ReportModule, AdminModule],
   controllers: [AppController],
   providers: [AppService],
 })

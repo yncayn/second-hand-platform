@@ -11,9 +11,18 @@ interface Product {
     price: number;
     category: string;
     status: string;
+
+    images: {
+        product_image_id: number;
+        image_url: string;
+    }[];
 }
 
-function Home() {
+interface Props {
+    onOpenChatList: () => void;
+}
+
+function Home({ onOpenChatList }: Props) {
     const [products, setProducts] = useState<Product[]>([]);
     const [keyword, setKeyword] = useState("");
     const [selectedProduct, setSelectedProduct] = useState<number | null>(null);
@@ -86,13 +95,14 @@ function Home() {
     // 상품 상세 화면
     if (selectedProduct !== null) {
         return (
-        <ProductDetail
-            productId={selectedProduct}
-            onBack={() => {
-                setSelectedProduct(null);
-                getProducts();
-            }}
-        />
+            <ProductDetail
+                productId={selectedProduct}
+                onBack={() => {
+                    setSelectedProduct(null);
+                    getProducts();
+                }}
+                onOpenChatList={onOpenChatList}
+            />
         );
     }
 
@@ -139,35 +149,47 @@ function Home() {
             ) : (
             products.map((product) => (
                 <div
-                className="product-card"
-                key={product.product_id}
+                    className="product-card"
+                    key={product.product_id}
                 >
-                <h3>{product.product_name}</h3>
+                    {product.images?.length > 0 ? (
+                        <img
+                            src={`http://localhost:3000${product.images[0].image_url}`}
+                            alt={product.product_name}
+                            className="product-image"
+                        />
+                    ) : (
+                        <div className="product-image no-image">
+                            이미지 없음
+                        </div>
+                    )}
 
-                <p>
-                    <strong>가격</strong> :{" "}
-                    {product.price.toLocaleString()}원
-                </p>
+                    <h3>{product.product_name}</h3>
 
-                <p>
-                    <strong>카테고리</strong> :{" "}
-                    {getCategory(product.category)}
-                </p>
+                    <p>
+                        <strong>가격</strong> :{" "}
+                        {product.price.toLocaleString()}원
+                    </p>
 
-                <p>
-                    <strong>상태</strong> :{" "}
-                    {getStatus(product.status)}
-                </p>
+                    <p>
+                        <strong>카테고리</strong> :{" "}
+                        {getCategory(product.category)}
+                    </p>
 
-                <p>{product.product_description}</p>
+                    <p>
+                        <strong>상태</strong> :{" "}
+                        {getStatus(product.status)}
+                    </p>
 
-                <button
-                    onClick={() =>
-                    setSelectedProduct(product.product_id)
-                    }
-                >
-                    상세보기
-                </button>
+                    <p>{product.product_description}</p>
+
+                    <button
+                        onClick={() =>
+                            setSelectedProduct(product.product_id)
+                        }
+                    >
+                        상세보기
+                    </button>
                 </div>
             ))
             )}

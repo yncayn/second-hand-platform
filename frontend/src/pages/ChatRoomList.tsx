@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-interface Props {
-    onSelectRoom: (roomId: number) => void;
+
+interface Props{
+    onSelectRoom:(roomId:number)=>void;
+    onBack:()=>void;
 }
 
 interface Room {
@@ -21,7 +23,10 @@ interface Room {
     }[];
 }
 
-function ChatRoomList({ onSelectRoom }: Props) {
+function ChatRoomList({
+    onSelectRoom,
+    onBack,
+}: Props) {
     const [rooms, setRooms] = useState<Room[]>([]);
 
     const accessToken = localStorage.getItem("accessToken");
@@ -69,15 +74,35 @@ function ChatRoomList({ onSelectRoom }: Props) {
             }}
         >
             <div
-                style={{
-                    padding: 18,
-                    background: "#ffeb3b",
-                    fontWeight: "bold",
-                    fontSize: 22,
-                }}
-            >
-                채팅
-            </div>
+    style={{
+        display:"flex",
+        alignItems:"center",
+        padding:18,
+        background:"#ffeb3b"
+    }}
+>
+    <button
+        onClick={onBack}
+        style={{
+            border:"none",
+            background:"transparent",
+            cursor:"pointer",
+            fontSize:18,
+            marginRight:15
+        }}
+    >
+        ←
+    </button>
+
+    <div
+        style={{
+            fontWeight:"bold",
+            fontSize:22
+        }}
+    >
+        채팅
+    </div>
+</div>
 
             {rooms.map((room) => (
                 <div
